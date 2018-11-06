@@ -1,0 +1,32 @@
+{
+  "lang": "en",
+  "name": "Airplane Time",
+  "short_name": "Airplane Time",
+  "description": "Stretch time while flying",
+  "theme_color": "#222222",
+  "background_color": "#ffffff",
+  "start_url": "/",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "/images/airplane-icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/airplane-icon-114.png",
+      "sizes": "114x114",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/airplane-icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/airplane-icon-57.png",
+      "sizes": "57x57",
+      "type": "image/png"
+    }
+  ]
+}

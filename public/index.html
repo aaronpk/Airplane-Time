@@ -1,0 +1,183 @@
+<html>
+<head>
+<title>Airplane Time</title>
+<link rel="manifest" href="manifest.json">
+<link rel="serviceworker" href="serviceworker.js">
+<link rel="stylesheet" href="bootstrap-4.1.3/css/bootstrap.min.css">
+<link rel="stylesheet" href="style.css">
+<link rel="apple-touch-icon" sizes="57x57" href="images/airplane-icon-57.png">
+<link rel="apple-touch-icon" sizes="72x72" href="images/airplane-icon-72.png">
+<link rel="apple-touch-icon" sizes="114x114" href="images/airplane-icon-114.png">
+<link rel="apple-touch-icon" sizes="144x144" href="images/airplane-icon-144.png">
+<link rel="icon" type="image/png" href="images/airplane-16px.png">
+<meta name="viewport" content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width" />
+<script src="js/jquery-3.3.1.js"></script>
+<script src="bootstrap-4.1.3/js/bootstrap.min.js"></script>
+<script src="js/script.js"></script>
+<script>
+// Register the ServiceWorker. In future browser versions, the rel=serviceworker link above will be enough
+if(navigator.serviceWorker) {
+  navigator.serviceWorker.register('/serviceworker.js')
+}
+</script>
+</head>
+<body>
+
+<nav class="navbar navbar-light bg-light">
+  <a class="navbar-brand" href="/">
+    <img src="/images/airplane-icon-144.png" width="30" height="30" alt="" style="border-radius: 15px">
+    Airplane Time
+  </a>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item">
+        <a class="nav-link" href="/settings.html">Settings</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link disabled">Version <span id="version"></span></a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<div id="container" class="container clocks">
+
+
+  <div class="time-container">
+    <h3>Departure Time</h3>
+    <div id="departure" class="time"></div>
+  </div>
+
+  <div class="time-container">
+    <h3>Time at Origin</h3>
+    <div id="origin" class="time"></div>
+  </div>
+
+  <div class="airplanetime-container">
+    <h3>Airplane Time</h3>
+    <div id="airplane_time" class="time"></div>
+    <div id="progressbar">
+      <div id="progress"></div>
+    </div>
+  </div>
+
+  <div class="time-container">
+    <h3>Time at Destination</h3>
+    <div id="destination" class="time"></div>
+  </div>
+
+  <div class="time-container">
+    <h3>Arrival Time</h3>
+    <div id="arrival" class="time"></div>
+  </div>
+
+
+</div>
+<script>
+var departure;
+var departure_offset;
+var departure_local;
+var arrival;
+var arrival_offset;
+var arrival_local;
+var duration;
+var rate;
+
+// Capture events from the ServiceWorker
+navigator.serviceWorker.addEventListener('message', function(event){
+  if(m=event.data.match(/version-(.+)/)) {
+    $("#version").text(m[1]);
+  } else {
+    // alert(event.data);
+  }
+});
+
+if(navigator.serviceWorker.controller) {
+  navigator.serviceWorker.controller.postMessage('version');
+}
+
+$(function(){
+  var departure_date = localStorage.getItem("departure_date");
+  if(departure_date) {
+
+    departure = new Date(localStorage.getItem("departure_date")
+      +' '+localStorage.getItem("departure_time")
+      +' '+localStorage.getItem("departure_offset"));
+    departure_offset = tz_offset_to_minutes(localStorage.getItem("departure_offset"));
+    arrival = new Date(localStorage.getItem("arrival_date")
+      +' '+localStorage.getItem("arrival_time")
+      +' '+localStorage.getItem("arrival_offset"));
+    arrival_offset = tz_offset_to_minutes(localStorage.getItem("arrival_offset"));
+
+    duration = arrival - departure;
+
+    // Get the localized dates.
+    // Find the tz offset of the browser
+    var now = new Date();
+    departure_local = new Date(localStorage.getItem("departure_date")
+      +' '+localStorage.getItem("departure_time")
+      +' +0000');
+    arrival_local = new Date(localStorage.getItem("arrival_date")
+      +' '+localStorage.getItem("arrival_time")
+      +' +0000');
+
+    var duration_local = arrival_local - departure_local;
+
+    rate = duration_local / duration;
+
+    console.log('Departure', departure);
+    console.log('Departure (Local)', departure_local.toUTCString());
+    console.log('Arrival', arrival);
+    console.log('Arrival (Local)', arrival_local.toUTCString());
+    console.log('Duration', tz_seconds_to_offset(duration / 1000) + ' hours');
+    console.log('Flight Seconds per Second', rate);
+
+    updateClocks();
+  } else {
+    window.location = "/settings.html";
+  }
+
+  updateOnlineStatus();
+
+});
+
+function updateClocks() {
+  var now = new Date();
+  var seconds = Math.floor((now - departure) / 1000);
+  var flight_seconds = Math.floor(seconds * rate);
+
+  var now_origin = new Date(dateToUTCYMD(now)+' '+dateToUTCHM(now)+' '+tz_minutes_to_offset(departure_offset));
+  var now_destination = new Date(dateToUTCYMD(now)+' '+dateToUTCHM(now)+' '+tz_minutes_to_offset(-1*arrival_offset)); //js offsets are backwards
+
+  $("#departure").text(dateToUTCHM(departure_local)+' ('+tz_minutes_to_offset(departure_offset)+')');
+  $("#origin").text(dateToUTCHM(now_origin)+' ('+tz_minutes_to_offset(departure_offset)+')');
+  $("#arrival").text(dateToUTCHM(arrival_local)+' ('+tz_minutes_to_offset(arrival_offset)+')');
+  $("#destination").text(dateToUTCHM(now_destination)+' ('+tz_minutes_to_offset(arrival_offset)+')');
+
+  $("#progress").css('width', Math.floor(seconds / (duration/1000) * 100)+'%');
+
+  //console.log(seconds, flight_seconds);
+  // Add the flight seconds to the departure date
+  var airplane_time = new Date(departure);
+  var flight_seconds_abs = Math.abs(flight_seconds);
+  var sign = (flight_seconds < 0 ? -1 : 1);
+  var seconds_diff = (flight_seconds_abs % 60) * sign;
+  var minutes_diff = (Math.floor(flight_seconds_abs/60) % 60) * sign;
+  var hours_diff = Math.floor(flight_seconds_abs/60/60) * sign;
+  airplane_time.setUTCSeconds( departure.getUTCSeconds() + seconds_diff);
+  airplane_time.setUTCMinutes( departure.getUTCMinutes() + minutes_diff);
+  airplane_time.setUTCHours( departure.getUTCHours() + hours_diff );
+
+  $("#airplane_time").text(dateToUTCHM(airplane_time));
+}
+
+setInterval(updateClocks, 1000);
+
+</script>
+</body>
+</html>
