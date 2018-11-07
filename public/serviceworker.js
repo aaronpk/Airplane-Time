@@ -1,6 +1,6 @@
 "use strict";
 
-const version = 9;
+const version = 10;
 const staticCacheName = 'airplanetime-'+version;
 
 // Cache all the required assets when the ServiceWorker installs
