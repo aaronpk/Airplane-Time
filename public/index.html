@@ -106,12 +106,12 @@ $(function(){
   if(departure_date) {
 
     departure = new Date(localStorage.getItem("departure_date")
-      +' '+localStorage.getItem("departure_time")
-      +' '+localStorage.getItem("departure_offset"));
+      +'T'+localStorage.getItem("departure_time")+":00"
+      +''+localStorage.getItem("departure_offset"));
     departure_offset = tz_offset_to_minutes(localStorage.getItem("departure_offset"));
     arrival = new Date(localStorage.getItem("arrival_date")
-      +' '+localStorage.getItem("arrival_time")
-      +' '+localStorage.getItem("arrival_offset"));
+      +'T'+localStorage.getItem("arrival_time")+":00"
+      +''+localStorage.getItem("arrival_offset"));
     arrival_offset = tz_offset_to_minutes(localStorage.getItem("arrival_offset"));
 
     duration = arrival - departure;
@@ -120,11 +120,11 @@ $(function(){
     // Find the tz offset of the browser
     var now = new Date();
     departure_local = new Date(localStorage.getItem("departure_date")
-      +' '+localStorage.getItem("departure_time")
-      +' +0000');
+      +'T'+localStorage.getItem("departure_time")+":00"
+      +'+00:00');
     arrival_local = new Date(localStorage.getItem("arrival_date")
-      +' '+localStorage.getItem("arrival_time")
-      +' +0000');
+      +'T'+localStorage.getItem("arrival_time")+":00"
+      +'+00:00');
 
     var duration_local = arrival_local - departure_local;
 
@@ -149,8 +149,8 @@ function updateClocks() {
   var seconds = Math.floor((now - departure) / 1000);
   var flight_seconds = Math.floor(seconds * rate);
 
-  var now_origin = new Date(dateToUTCYMD(now)+' '+dateToUTCHM(now)+' '+tz_minutes_to_offset(departure_offset));
-  var now_destination = new Date(dateToUTCYMD(now)+' '+dateToUTCHM(now)+' '+tz_minutes_to_offset(-1*arrival_offset)); //js offsets are backwards
+  var now_origin = new Date(dateToUTCYMD(now)+'T'+dateToUTCHM(now)+':00'+tz_minutes_to_offset(departure_offset));
+  var now_destination = new Date(dateToUTCYMD(now)+'T'+dateToUTCHM(now)+':00'+tz_minutes_to_offset(-1*arrival_offset)); //js offsets are backwards
 
   $("#departure").text(dateToUTCHM(departure_local)+' ('+tz_minutes_to_offset(departure_offset)+')');
   $("#origin").text(dateToUTCHM(now_origin)+' ('+tz_minutes_to_offset(departure_offset)+')');
