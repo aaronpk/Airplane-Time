@@ -1,25 +1,6 @@
 window.addEventListener('online',  updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 
-function updateOnlineStatus(event) {
-  console.log("Device is "+(navigator.onLine ? "online" : "offline"));
-
-  if(navigator.onLine) {
-    $("body").addClass("online").removeClass("offline");
-    if(window.syncAllPosts) {
-      console.log('syncing posts');
-      refreshSavedPosts();
-      syncAllPosts();
-    }
-  } else {
-    $("body").addClass("offline").removeClass("online");
-    if(window.refreshSavedPosts) {
-      console.log('loading posts');
-      refreshSavedPosts();
-    }
-  }
-}
-
 function tz_seconds_to_offset(seconds) {
   var hours = zero_pad(Math.floor(Math.abs(seconds / 60 / 60)));
   var minutes = zero_pad(Math.floor(Math.abs(seconds) / 60) % 60);

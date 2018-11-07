@@ -142,8 +142,6 @@ $(function(){
     window.location = "/settings.html";
   }
 
-  updateOnlineStatus();
-
 });
 
 function updateClocks() {
@@ -159,7 +157,10 @@ function updateClocks() {
   $("#arrival").text(dateToUTCHM(arrival_local)+' ('+tz_minutes_to_offset(arrival_offset)+')');
   $("#destination").text(dateToUTCHM(now_destination)+' ('+tz_minutes_to_offset(arrival_offset)+')');
 
-  $("#progress").css('width', Math.floor(seconds / (duration/1000) * 100)+'%');
+  var percent = Math.floor(seconds / (duration/1000) * 100);
+  if(percent > 100) { percent = 100; }
+  if(percent < 0) { percent = 0; }
+  $("#progress").css('width', percent+'%');
 
   //console.log(seconds, flight_seconds);
   // Add the flight seconds to the departure date
@@ -173,7 +174,13 @@ function updateClocks() {
   airplane_time.setUTCMinutes( departure.getUTCMinutes() + minutes_diff);
   airplane_time.setUTCHours( departure.getUTCHours() + hours_diff );
 
-  $("#airplane_time").text(dateToUTCHM(airplane_time));
+  if(now < departure) {
+    $("#airplane_time").text('not yet departed');
+  } else if(now > arrival) {
+    $("#airplane_time").text('flight has arrived');
+  } else {
+    $("#airplane_time").text(dateToUTCHM(airplane_time));
+  }
 }
 
 setInterval(updateClocks, 1000);
