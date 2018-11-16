@@ -1,5 +1,3 @@
-window.addEventListener('online',  updateOnlineStatus);
-window.addEventListener('offline', updateOnlineStatus);
 
 function tz_seconds_to_offset(seconds) {
   var hours = zero_pad(Math.floor(Math.abs(seconds / 60 / 60)));

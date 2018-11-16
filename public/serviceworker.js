@@ -1,6 +1,6 @@
 "use strict";
 
-const version = 10;
+const version = 16;
 const staticCacheName = 'airplanetime-'+version;
 
 // Cache all the required assets when the ServiceWorker installs
@@ -73,11 +73,11 @@ function cacheAssets() {
   .then( cache => {
     // Nice to have, won't error if these fail
     cache.addAll([
-      'images/airplane-16px.png',
-      'images/airplane-icon-57.png',
-      'images/airplane-icon-72.png',
-      'images/airplane-icon-114.png',
-      'images/airplane-icon-144.png',
+      '/images/airplane-16px.png',
+      '/images/airplane-icon-57.png',
+      '/images/airplane-icon-72.png',
+      '/images/airplane-icon-114.png',
+      '/images/airplane-icon-144.png',
     ]);
 
     // Must have, will error if they fail to download

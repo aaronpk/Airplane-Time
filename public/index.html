@@ -149,8 +149,8 @@ function updateClocks() {
   var seconds = Math.floor((now - departure) / 1000);
   var flight_seconds = Math.floor(seconds * rate);
 
-  var now_origin = new Date(dateToUTCYMD(now)+'T'+dateToUTCHM(now)+':00'+tz_minutes_to_offset(departure_offset));
-  var now_destination = new Date(dateToUTCYMD(now)+'T'+dateToUTCHM(now)+':00'+tz_minutes_to_offset(-1*arrival_offset)); //js offsets are backwards
+  var now_origin = new Date(dateToUTCYMD(now)+'T'+dateToUTCHM(now)+':00'+tz_minutes_to_offset(-1*departure_offset)); //js offsets are backwards
+  var now_destination = new Date(dateToUTCYMD(now)+'T'+dateToUTCHM(now)+':00'+tz_minutes_to_offset(-1*arrival_offset));
 
   $("#departure").text(dateToUTCHM(departure_local)+' ('+tz_minutes_to_offset(departure_offset)+')');
   $("#origin").text(dateToUTCHM(now_origin)+' ('+tz_minutes_to_offset(departure_offset)+')');
@@ -170,9 +170,9 @@ function updateClocks() {
   var seconds_diff = (flight_seconds_abs % 60) * sign;
   var minutes_diff = (Math.floor(flight_seconds_abs/60) % 60) * sign;
   var hours_diff = Math.floor(flight_seconds_abs/60/60) * sign;
-  airplane_time.setUTCSeconds( departure.getUTCSeconds() + seconds_diff);
-  airplane_time.setUTCMinutes( departure.getUTCMinutes() + minutes_diff);
-  airplane_time.setUTCHours( departure.getUTCHours() + hours_diff );
+  airplane_time.setUTCSeconds( departure_local.getUTCSeconds() + seconds_diff);
+  airplane_time.setUTCMinutes( departure_local.getUTCMinutes() + minutes_diff);
+  airplane_time.setUTCHours( departure_local.getUTCHours() + hours_diff );
 
   if(now < departure) {
     $("#airplane_time").text('not yet departed');
